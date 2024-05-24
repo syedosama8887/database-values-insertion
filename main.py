@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.v1 import databasevalues  # Import your router here
+from api.v1 import databasevalues# Import your router
 
 # Create a FastAPI instance
 app = FastAPI(
@@ -8,20 +8,21 @@ app = FastAPI(
     version="1.0",
 )
 
-# CORS settings
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update with your frontend URL in production
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST"],  # Allow both GET and POST methods
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
-# Include your router
+# Include your router(s)
 app.include_router(databasevalues)
 
 # Run the app if this script is executed directly
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("main:app", reload=True, host="127.0.0.1", port=8000)
 
