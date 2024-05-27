@@ -27,10 +27,34 @@
             height: 100vh;
         }
 
-        table {
+        .table-container {
+            position: relative;
             width: 80%;
-            border-collapse: collapse;
             margin: 20px auto;
+        }
+
+        .table-container input[type="button"] {
+            position: absolute;
+            top: -40px; /* Adjust this value to position the button as desired */
+            right: 0;
+            width: auto;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .table-container input[type="button"]:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
             background-color: #fff;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
@@ -47,6 +71,23 @@
             color: #fff;
         }
 
+        input[type="button"] {
+            width: 10%;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: lightseagreen;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 80px; /* Adjust this value to move the button downward */
+            text-align: center; /* Center the text */
+        }
+
+        input[type="button"]:hover {
+            background-color: #45a049;
+        }
+
         tr:hover {
             background-color: #f5f5f5;
         }
@@ -56,7 +97,9 @@
     <header>
         <h1>DATA PAGE</h1>
     </header>
-
+    <form>
+        <input type="button" value="Create New" onclick="location.href='index.html'">
+    </form>
     <main class="data-container">
         <table id="data-table">
             <thead>
@@ -65,6 +108,7 @@
                     <th>Name</th>
                     <th>Age</th>
                     <th>Email</th>
+                    <th>Actions</th> <!-- Added Actions column -->
                 </tr>
             </thead>
             <tbody id="data-body">
@@ -74,7 +118,7 @@
     </main>
 
     <script>
-        // Fetch data from FastAPI endpoint
+        // Function to fetch data from FastAPI endpoint
         async function fetchData() {
             try {
                 const response = await fetch('http://127.0.0.1:8000/fetch_data'); // Replace with your FastAPI server URL
@@ -84,13 +128,14 @@
                 const data = await response.json();
                 console.log(data);
 
-                // Construct HTML for table rows
+                // Construct HTML for table rows with edit buttons
                 const rows = data.data.map(row => `
-                    <tr>
-                        <td>${row[0]}</td>
-                        <td>${row[1]}</td>
-                        <td>${row[2]}</td>
-                        <td>${row[3]}</td>
+                    <tr id="row-${row.id}" data-row='${JSON.stringify(row)}'>
+                        <td>${row.id}</td>
+                        <td>${row.name}</td>
+                        <td>${row.age}</td>
+                        <td>${row.email}</td>
+                        <td><button class="edit-btn" onclick="editRow(${row.id})">Edit</button></td>
                     </tr>
                 `).join('');
 
@@ -107,6 +152,16 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchData();
         });
+
+        // Function to handle edit button click
+        function editRow(id) {
+            // Store row data in session storage
+            const rowData = document.querySelector(`#row-${id}`).dataset.row;
+            sessionStorage.setItem('rowData', rowData);
+
+            // Redirect to update.html for editing
+            location.href = 'update.html';
+        }
     </script>
 </body>
 </html>

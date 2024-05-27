@@ -23,6 +23,6 @@ app.include_router(databasevalues)
 # Run the app if this script is executed directly
 if __name__ == "__main__":
     import uvicorn
-
+    
     uvicorn.run("main:app", reload=True, host="127.0.0.1", port=8000)
-
+    
