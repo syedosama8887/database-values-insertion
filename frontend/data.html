@@ -38,7 +38,7 @@
             top: -40px; /* Adjust this value to position the button as desired */
             right: 0;
             width: auto;
-            padding: 10px 20px;
+                padding: 10px 20px;
             border: none;
             border-radius: 4px;
             background-color: #4CAF50;
@@ -70,7 +70,6 @@
             background-color: lightseagreen;
             color: #fff;
         }
-
         input[type="button"] {
             width: 10%;
             padding: 12px;
@@ -90,7 +89,16 @@
 
         tr:hover {
             background-color: #f5f5f5;
-        }
+        }    </style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Page</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Your CSS styles */
     </style>
 </head>
 <body>
@@ -108,20 +116,20 @@
                     <th>Name</th>
                     <th>Age</th>
                     <th>Email</th>
-                    <th>Actions</th> <!-- Added Actions column -->
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="data-body">
-                <!-- Data will be inserted here dynamically -->
+                 Data will be inserted here dynamically 
             </tbody>
         </table>
-    </main>
+    </main> 
 
     <script>
         // Function to fetch data from FastAPI endpoint
         async function fetchData() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/fetch_data'); // Replace with your FastAPI server URL
+                const response = await fetch('http://127.0.0.1:8000/fetch_data');
                 if (!response.ok) {
                     throw new Error('Failed to fetch data');
                 }
@@ -130,12 +138,12 @@
 
                 // Construct HTML for table rows with edit buttons
                 const rows = data.data.map(row => `
-                    <tr id="row-${row.id}" data-row='${JSON.stringify(row)}'>
-                        <td>${row.id}</td>
-                        <td>${row.name}</td>
-                        <td>${row.age}</td>
-                        <td>${row.email}</td>
-                        <td><button class="edit-btn" onclick="editRow(${row.id})">Edit</button></td>
+                    <tr>
+                        <td>${row[0]}</td>
+                        <td>${row[1]}</td>
+                        <td>${row[2]}</td>
+                        <td>${row[3]}</td>
+                        <td><button class="edit-btn" onclick="editRow(${row[0]})">Edit</button></td>
                     </tr>
                 `).join('');
 
@@ -154,14 +162,26 @@
         });
 
         // Function to handle edit button click
-        function editRow(id) {
-            // Store row data in session storage
-            const rowData = document.querySelector(`#row-${id}`).dataset.row;
-            sessionStorage.setItem('rowData', rowData);
+        async function editRow(id) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/fetch_data/${id}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data for editing');
+                }
+                const data = await response.json();
+                console.log(data);
 
-            // Redirect to update.html for editing
-            location.href = 'update.html';
+                // Store data in session storage
+                sessionStorage.setItem('rowData', JSON.stringify(data.data));
+
+                // Redirect to update form
+                location.href = 'update.html';
+            } catch (error) {
+                console.error('Error editing row:', error);
+                alert('Failed to fetch data for editing.');
+            }
         }
-    </script>
+    </script> 
+    
 </body>
-</html>
+</html> 

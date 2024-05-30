@@ -105,6 +105,36 @@ def update_record_in_db(staff: Staff):
 
     except mysql.connector.Error as err:
         raise HTTPException(status_code=500, detail=str(err))
+# Function to insert a new record into database
+def insert_record_in_db(staff: Staff):
+    try:
+        # Connect to MySQL database
+        mydb = mysql.connector.connect(**db_config)
+
+        # Create cursor
+        mycursor = mydb.cursor()
+
+        # Insert query
+        sql = "INSERT INTO staff (name, age, email) VALUES (%s, %s, %s)"
+        val = (staff.name, staff.age, staff.email)
+        mycursor.execute(sql, val)
+
+        # Commit changes
+        mydb.commit()
+
+        # Close cursor and connection
+        mycursor.close()
+        mydb.close()
+
+        return {"message": "Record inserted successfully"}
+
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=500, detail=str(err))
+
+# Endpoint to insert a new record into database
+@router.post("/insert_staff")
+async def insert_staff(staff: Staff):
+    return insert_record_in_db(staff)
 
 # Endpoint to update records in database
 @router.put("/update_staff/{id}")
