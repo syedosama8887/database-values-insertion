@@ -4,6 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <!-- Add your CSS file link here -->
+   
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <p id="errorMessage" style="color: red;"></p>
+        <p id="successMessage" style="color: green;"></p>
+        <a href="signup.html" class="signup-link">Sign Up</a>
+    </div>
+
+    <script>
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    const email = formData.get('email');
+    const password = formData.get('password');
+
+    fetch('http://localhost:8000/login', {  // Replace with your FastAPI server URL
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Check response for success or failure
+        if (data.message === 'Login successful') {
+            document.getElementById('successMessage').textContent = 'Login successful';
+            // Redirect to dashboard or data page
+            window.location.href = 'data.html'; // Replace with your actual data page URL
+        } else {
+            document.getElementById('errorMessage').textContent = 'Invalid email or password';
+            document.getElementById('successMessage').textContent = '';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('errorMessage').textContent = 'An error occurred, please try again';
+        document.getElementById('successMessage').textContent = '';
+    });
+});
+
+    </script>
+
+</body>
+</html> 
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -65,25 +130,3 @@
             text-decoration: underline;
         }
     </style>
-</head>
-<body>
-    <div class="login-container">
-        <h2>Login</h2>
-        <form action="/login" method="post">
-            <div class="input-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="input-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit" class="btn">Login</button>
-            
-        </form>
-        <!-- <a href="signup.html">signup</a> -->
-
-        <a href="signup.html" class="signup-.html">Sign Up</a>
-    </div>
-</body>
-</html>

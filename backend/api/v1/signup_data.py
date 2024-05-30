@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 import mysql.connector
 
@@ -11,6 +11,10 @@ class UserCreate(BaseModel):
     email: str
     password: str
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
 # Define your MySQL database configuration
 db_config = {
     'host': 'localhost',
@@ -19,6 +23,7 @@ db_config = {
     'database': 'data_test',
 }
 
+# Function to insert a new user record into the `users` table
 def insert_record_in_db(user: UserCreate):
     try:
         # Connect to MySQL database
@@ -27,7 +32,7 @@ def insert_record_in_db(user: UserCreate):
         # Create cursor
         mycursor = mydb.cursor()
 
-        # Insert query into `uses` table
+        # Insert query into `users` table
         sql = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
         val = (user.name, user.email, user.password)
         mycursor.execute(sql, val)
@@ -44,10 +49,137 @@ def insert_record_in_db(user: UserCreate):
     except mysql.connector.Error as err:
         raise HTTPException(status_code=500, detail=str(err))
 
-# Endpoint to insert a new user record into the `uses` table
-@router.post("/insert_user")
-async def insert_user(user: UserCreate):
+# Function to fetch a user record by email from the `users` table
+def fetch_user_by_email(email: str):
+    try:
+        # Connect to MySQL database
+        mydb = mysql.connector.connect(**db_config)
+
+        # Create cursor
+        mycursor = mydb.cursor(dictionary=True)
+
+        # Select query to fetch user by email
+        sql = "SELECT * FROM users WHERE email = %s"
+        mycursor.execute(sql, (email,))
+        user = mycursor.fetchone()
+
+        # Close cursor and connection
+        mycursor.close()
+        mydb.close()
+
+        return user
+
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=500, detail=str(err))
+
+# Endpoint to insert a new user record into the `users` table
+@router.post("/signup")
+async def signup(user: UserCreate):
     return insert_record_in_db(user)
+
+# Endpoint to authenticate user login
+
+@router.post("/login")
+async def login(login_data: UserLogin):
+    user = fetch_user_by_email(login_data.email)
+    if user and user['password'] == login_data.password:
+        return {"message": "Login successful", "user": user}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
+
+
+# from fastapi import FastAPI, HTTPException
+# from pydantic import BaseModel
+# import mysql.connector
+
+# # Create FastAPI instance
+# router= FastAPI()
+
+# # Define a Pydantic model for the request body
+# class UserCreate(BaseModel):
+#     name: str
+#     email: str
+#     password: str
+
+# # Define your MySQL database configuration
+# db_config = {
+#     'host': 'localhost',
+#     'user': 'root',
+#     'password': '',  # Replace with your MySQL password
+#     'database': 'data_test',
+# }
+
+# def insert_record_in_db(user: UserCreate):
+#     try:
+#         # Connect to MySQL database
+#         mydb = mysql.connector.connect(**db_config)
+
+#         # Create cursor
+#         mycursor = mydb.cursor()
+
+#         # Insert query into `uses` table
+#         sql = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
+#         val = (user.name, user.email, user.password)
+#         mycursor.execute(sql, val)
+
+#         # Commit changes
+#         mydb.commit()
+
+#         # Close cursor and connection
+#         mycursor.close()
+#         mydb.close()
+
+#         return {"message": "Record inserted successfully"}
+
+#     except mysql.connector.Error as err:
+#         raise HTTPException(status_code=500, detail=str(err))
+
+# # Endpoint to insert a new user record into the `uses` table
+
+# def fetch_user_by_email(email: str):
+#     try:
+#         # Connect to MySQL database
+#         mydb = mysql.connector.connect(**db_config)
+
+#         # Create cursor
+#         mycursor = mydb.cursor(dictionary=True)
+
+#         # Select query to fetch user by email
+#         sql = "SELECT * FROM users WHERE email = %s"
+#         mycursor.execute(sql, (email,))
+#         user = mycursor.fetchone()
+
+#         # Close cursor and connection
+#         mycursor.close()
+#         mydb.close()
+
+#         return user
+
+#     except mysql.connector.Error as err:
+#         raise HTTPException(status_code=500, detail=str(err))
+
+# @router.post("/login")
+# async def login(email: str, password: str):
+#     user = fetch_user_by_email(email)
+#     if user and user['password'] == password:
+#         return {"message": "Login successful", "user": user}
+#     else:
+#         raise HTTPException(status_code=401, detail="Invalid credentials")
+# @router.post("/insert_user")
+# async def insert_user(user: UserCreate):
+#     return insert_record_in_db(user)
+# @router.post("/signup")
+# async def signup(user: UserCreate):
+#     return insert_record_in_db(user)
+
+
+
+
+
+
+
 
 
 # from fastapi import APIRouter, HTTPException, Depends
